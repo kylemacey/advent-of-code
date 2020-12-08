@@ -1,3 +1,4 @@
+# Basically, match a regex against each line of input
 class RegexLoop
   include Enumerable
 
@@ -13,11 +14,31 @@ class RegexLoop
       yield(line.scan(regex))
     end
   end
-
-  protected
-
 end
 
+# Will only match once against each string
+class SingleMatchRegexLoop < RegexLoop
+  def structure(*args)
+    s = HashFactory.new(args)
+    map do |x|
+      s.build_hash(x.flatten)
+    end
+  end
+end
+
+# Can match multiple times against each string
+class RepeatingMatchRegexLoop < RegexLoop
+  def structure(*args)
+    s = HashFactory.new(args)
+    map do |x|
+      x.map do |y|
+        s.build_hash(y)
+      end
+    end
+  end
+end
+
+# Similar to Struct, but makes a hash
 class HashFactory
   attr_reader :keys
 
@@ -52,6 +73,8 @@ class HashFactory
   end
 end
 
+# A misnomer, since it actually combines an array of hashes, but it's pretty specific to our
+# use case so ¯\_(ツ)_/¯
 class RegexLoopCombination
   attr_reader :single, :repeating, :length
   include Enumerable
@@ -87,6 +110,7 @@ class RegexLoopCombination
   end
 end
 
+# A little convenience class for combining regexes and structures on a single input
 class Combiner
   attr_reader :input
 
@@ -113,32 +137,7 @@ class Combiner
   end
 end
 
-
-
-class SingleMatchRegexLoop < RegexLoop
-  def structure(*args)
-    s = HashFactory.new(args)
-    map do |x|
-      s.build_hash(x.flatten)
-    end
-  end
-end
-
-
-
-class RepeatingMatchRegexLoop < RegexLoop
-  def structure(*args)
-    s = HashFactory.new(args)
-    map do |x|
-      x.map do |y|
-        s.build_hash(y)
-      end
-    end
-  end
-end
-
-
-
+# IDK, these felt helpful and expedient
 module RegexHelpers
   def RL(...)
     RegexLoop.new(...)
@@ -157,5 +156,4 @@ module RegexHelpers
   end
 end
 
-puts "including RegexHelpers"
 include RegexHelpers

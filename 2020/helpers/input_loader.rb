@@ -18,5 +18,4 @@ module InputLoader
   end
 end
 
-puts "including InputLoader"
 include InputLoader

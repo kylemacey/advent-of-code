@@ -1,5 +1,6 @@
 #! /usr/bin/env ruby
 
+require_relative "helpers/input_loader"
 require_relative "helpers/day_helper"
 include DayHelper
 
@@ -12,11 +13,12 @@ template = <<-TEMPLATE
 
 require_relative "../helpers.rb"
 
+# Use for testing
 input = <<-IN
 
 IN
 
-# input = get_input(#{day})
+# input = File.read("./input.txt")
 
 # C(input)
 #   .single(/^(\w+ \w+)/, :container)
@@ -26,3 +28,6 @@ TEMPLATE
 
 new_file_path = File.join("day-#{day}", "main.rb")
 File.open(new_file_path, "w+") { |f| f.write template }
+
+input_file_path = File.join("day-#{day}", "input.txt")
+File.open(input_file_path, "w+") { |f| f.write get_input(day) }
