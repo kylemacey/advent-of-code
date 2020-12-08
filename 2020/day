@@ -1,0 +1,28 @@
+#! /usr/bin/env ruby
+
+require_relative "helpers/day_helper"
+include DayHelper
+
+day = ARGV[0] || today
+
+Dir.mkdir("day-#{day}")
+
+template = <<-TEMPLATE
+# Day #{day}
+
+require_relative "../helpers.rb"
+
+input = <<-IN
+
+IN
+
+# input = get_input(#{day})
+
+# C(input)
+#   .single(/^(\w+ \w+)/, :container)
+#   .repeating(:containees, /(\d+) (\w+ \w+)/, :qty, :desc)
+#   .combination.to_a
+TEMPLATE
+
+new_file_path = File.join("day-#{day}", "main.rb")
+File.open(new_file_path, "w+") { |f| f.write template }
