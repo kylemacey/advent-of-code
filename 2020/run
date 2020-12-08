@@ -1,0 +1,13 @@
+#! /usr/bin/env ruby
+
+require_relative "helpers/day_helper"
+include DayHelper
+
+day = ARGV[0] || today
+
+dir = "day-#{day}"
+find = File.join(dir, "**", "*.rb")
+
+Dir[find].each do |f|
+  require_relative f
+end

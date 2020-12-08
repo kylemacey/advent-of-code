@@ -1,3 +1,5 @@
+require_relative "../helpers.rb"
+
 input = <<-IN
 shiny gold bags contain 2 dark red bags.
 dark red bags contain 2 dark orange bags.
@@ -8,36 +10,29 @@ dark blue bags contain 1 dark violet bag.
 dark violet bags contain no other bags.
 IN
 
-require_relative "../helpers/input_loader"
+input = get_input(7)
 
+lines = C(input)
+  .single(/^(\w+ \w+)/, container: String)
+  .repeating(:containees, /(\d+) (\w+ \w+)/, qty: Integer, desc: String)
+  .combination
 
-input = InputLoader.get_input(7)
-
-container_regex = /(\w+ \w+) bags contain/
-containee_regex = /(\d+) (\w+ \w+) bag/
-containers = input.each_line.map do |l|
-  container = l.scan(container_regex).flatten.first
-  containees = l.scan(containee_regex).map {|k,v| [v, k.to_i]}.to_h
-  [container, containees]
-end.to_h
-
-# possible_containers = []
-new_containees = {"shiny gold" => 1}
+new_containees = [{desc: "shiny gold", qty: 1}]
 total = 0
 
 # [{"dark red" => 2}]
-
-# require "pry"; binding.pry
 loop do
-  new_containees = containers.map do |k, v|
-    next unless new_containees[k]
-    v.map do |desc, qty|
-      puts "adding #{new_containees[k] * qty} #{desc} bags, #{qty} in each of the #{new_containees[k]} #{k} bags"
-      total += new_containees[k] * qty
-      [desc, new_containees[k] * qty]
-    end.to_h
-  end.compact.reduce({}) { |sums, e|  sums.merge(e) { |_, a, b| a+b } }
-  # require "pry"; binding.pry
+  new_containees = lines.map do |line|
+    next unless parent_containee = new_containees.detect { |nc| nc[:desc] == line[:container] }
+    line[:containees].map do |containee|
+      new_qty = parent_containee[:qty] * containee[:qty]
+      puts "adding #{new_qty} #{containee[:desc]} bags, #{containee[:qty]} in each of the #{parent_containee[:qty]} #{parent_containee[:desc]} bags"
+      total += new_qty
+      { desc: containee[:desc], qty: new_qty }
+    end
+  end.flatten.compact
+    # Sum any qty by duplicate desc
+    .group_by { |x| x[:desc] }.map {|desc, attrs| { desc: desc, qty: attrs.sum { |x| x[:qty] } } }
   puts
   break if new_containees.empty?
 end

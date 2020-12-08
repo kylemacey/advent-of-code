@@ -18,7 +18,7 @@ end
 
 # Will only match once against each string
 class SingleMatchRegexLoop < RegexLoop
-  def structure(*args)
+  def structure(args)
     s = HashFactory.new(args)
     map do |x|
       s.build_hash(x.flatten)
@@ -28,7 +28,7 @@ end
 
 # Can match multiple times against each string
 class RepeatingMatchRegexLoop < RegexLoop
-  def structure(*args)
+  def structure(args)
     s = HashFactory.new(args)
     map do |x|
       x.map do |y|
@@ -39,6 +39,7 @@ class RepeatingMatchRegexLoop < RegexLoop
 end
 
 # Similar to Struct, but makes a hash
+# Ok well, now it also supports some rudimentary typing...
 class HashFactory
   attr_reader :keys
 
@@ -48,10 +49,15 @@ class HashFactory
 
   def build_hash(values)
     ensure_length!(values)
-    keys.map.with_index { |e, i| [e, values[i]] }.to_h
+    keys.map.with_index { |e, i| [e[0], send(e[1].name, values[i])] }.to_h
   end
 
   private
+
+  # Additional type casting
+  def Symbol(x)
+    x.to_sym
+  end
 
   def ensure_length!(values)
     unless keys.length == values.length
@@ -122,13 +128,13 @@ class Combiner
     @repeatings = {}
   end
 
-  def single(regex, *structure)
-    singles.push(SingleMatchRegexLoop.new(input, regex).structure(*structure))
+  def single(regex, **structure)
+    singles.push(SingleMatchRegexLoop.new(input, regex).structure(structure))
     self
   end
 
-  def repeating(key, regex, *structure)
-    repeatings[key] = RepeatingMatchRegexLoop.new(input, regex).structure(*structure)
+  def repeating(key, regex, **structure)
+    repeatings[key] = RepeatingMatchRegexLoop.new(input, regex).structure(structure)
     self
   end
 
