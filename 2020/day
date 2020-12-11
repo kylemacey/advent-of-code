@@ -18,7 +18,7 @@ input = <<-IN
 
 IN
 
-# input = File.read("./input.txt")
+# input = get_input(#{day})
 
 # C(input)
 #   .single(/^(\w+ \w+)/, :container)
